@@ -7,4 +7,4 @@ const blogPostSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model("BlogPost", blogPostSchema);
+module.exports = mongoose.model("BlogPost", blogPostSchema);
