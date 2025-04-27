@@ -1,5 +1,6 @@
+const dotenv = require("dotenv");
+dotenv.config();
 const nodemailer = require("nodemailer");
-
 const sendVerificationEmail = async (email, token) => {
   try {
     // Configure transporter
@@ -9,7 +10,7 @@ const sendVerificationEmail = async (email, token) => {
       port: 465,
       auth: {
         user: process.env.EMAILSENDER,
-        pass: process.env.PASS,
+        pass: process.env.EMAIL_PAWORD,
       },
     });
 
@@ -25,6 +26,7 @@ const sendVerificationEmail = async (email, token) => {
       `,
     };
     console.log(token);
+
     await transporter.sendMail(mailOptions);
     console.log("Verification email sent to:", email);
   } catch (error) {

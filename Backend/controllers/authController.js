@@ -10,17 +10,38 @@ const signup = async (req, res) => {
     if (existingUser)
       return res.status(400).json({ message: "User already exists" });
 
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashedPassword });
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-    res.status(201).json({ token, user });
+    // Generate raw token and hash it
+    const verificationTokenRaw = `${email}-${Date.now()}`;
+    const verificationToken = await bcrypt.hash(verificationTokenRaw, 10);
+
+    const verificationTokenExpiry = Date.now() + 24 * 60 * 60 * 1000;
+
+    // Create and save the user
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+      verificationToken,
+      verificationTokenExpiry,
+    });
+
+    // Save the user
+    await user.save();
+
+    // Send verification email
+    await sendVerificationEmail(email, verificationToken);
+
+    res
+      .status(201)
+      .json({ message: "Signup successful! Please verify your email." });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err);
+    res
+      .status(500)
+      .json({ message: "An error occurred while processing your request." });
   }
 };
 
