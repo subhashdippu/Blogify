@@ -27,7 +27,7 @@ const signup = async (req, res) => {
       verificationToken,
       verificationTokenExpiry,
     });
-
+    console.log(verificationToken);
     // Save the user
     await user.save();
 
@@ -44,6 +44,7 @@ const signup = async (req, res) => {
       .json({ message: "An error occurred while processing your request." });
   }
 };
+
 const verifyEmail = async (req, res) => {
   const { token } = req.params;
   console.log("Received token for verification:", token);
@@ -87,6 +88,11 @@ const login = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
+    if (!user.isVerified) {
+      return res
+        .status(403)
+        .json({ message: "Please verify your email before logging in." });
+    }
     // Generate JWT token
     const token = jwt.sign(
       { id: user._id, name: user.name, role: user.role },

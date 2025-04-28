@@ -1,17 +1,36 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react"; // <-- added useState
+import { Link, useNavigate } from "react-router-dom";
 import { FaFacebookF, FaGithub, FaGoogle } from "react-icons/fa";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [loginError, setLoginError] = useState(""); // <-- new state for error
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
+  const onSubmit = async (data) => {
+    try {
+      setLoginError(""); // clear previous errors
+      const response = await axios.post(
+        "http://localhost:4001/api/auth/login",
+        data
+      );
+
+      localStorage.setItem("token", response.data.token);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error(
+        "Login failed:",
+        error.response?.data?.message || error.message
+      );
+      setLoginError(error.response?.data?.message || "Login failed"); // <-- set error to show below form
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -52,40 +71,28 @@ const Login = () => {
             )}
           </div>
 
-          {/* Submit */}
-          <div className="form-control mt-6">
-            <button
-              type="submit"
-              className="btn bg-green-500 text-white w-full"
-            >
-              Login
-            </button>
-          </div>
+          {/* Login Error */}
+          {loginError && (
+            <p className="text-red-500 text-center mb-4">{loginError}</p> // <-- show backend error here
+          )}
 
-          {/* Signup Link */}
-          <div className="text-center mt-4">
-            Don't have an account?
-            <Link to="/signup" className="ml-2 underline text-blue-600">
-              Signup here
-            </Link>
-          </div>
+          <button type="submit" className="btn btn-primary w-full">
+            Login
+          </button>
         </form>
 
-        {/* Social Buttons */}
-        <div className="text-center space-x-3 mt-6">
-          <button
-            onClick={handleGoogleLogin}
-            className="btn btn-circle hover:bg-green-500 hover:text-white"
-          >
-            <FaGoogle />
-          </button>
-          <button className="btn btn-circle hover:bg-green-500 hover:text-white">
-            <FaFacebookF />
-          </button>
-          <button className="btn btn-circle hover:bg-green-500 hover:text-white">
-            <FaGithub />
-          </button>
+        <div className="flex justify-center gap-4 mt-5">
+          <FaGoogle onClick={handleGoogleLogin} className="cursor-pointer" />
+          <FaFacebookF className="cursor-pointer" />
+          <FaGithub className="cursor-pointer" />
         </div>
+
+        <p className="text-center mt-4">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-blue-500">
+            Sign Up
+          </Link>
+        </p>
       </div>
     </div>
   );
