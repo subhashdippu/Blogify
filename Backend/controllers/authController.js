@@ -44,6 +44,36 @@ const signup = async (req, res) => {
       .json({ message: "An error occurred while processing your request." });
   }
 };
+const verifyEmail = async (req, res) => {
+  const { token } = req.params;
+  console.log("Received token for verification:", token);
+  try {
+    // Find user based on hashed verification token and expired token condition
+    const user = await User.findOne({
+      isVerified: false,
+      verificationToken: token,
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    // Check if the token has expired
+    if (user.verificationTokenExpiry < Date.now()) {
+      return res.status(400).json({ message: "Token has expired" });
+    }
+
+    // Mark the user as verified
+    user.isVerified = true;
+    user.verificationToken = undefined; // Remove token after verification
+    await user.save();
+
+    res.status(200).json({ message: "Email verified successfully!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -74,4 +104,5 @@ const login = async (req, res) => {
 module.exports = {
   login,
   signup,
+  verifyEmail,
 };
