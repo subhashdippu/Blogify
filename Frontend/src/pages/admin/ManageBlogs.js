@@ -1,103 +1,111 @@
-import React, { useState, useEffect } from "react";
-import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import Swal from "sweetalert2";
-import { Link } from "react-router-dom";
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
 
-// Mock data
-const mockBlogs = [
-  {
-    _id: 1,
-    title: "First Blog Post",
-    description: "This is the first blog description.",
-    image: "https://via.placeholder.com/150",
-    author: "Admin",
-    date: "2022-01-01",
-  },
-  {
-    _id: 2,
-    title: "Second Blog Post",
-    description: "This is the second blog description.",
-    image: "https://via.placeholder.com/150",
-    author: "Admin",
-    date: "2022-01-02",
-  },
-];
+const fetchBlogs = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Not authenticated");
+
+  const { data } = await axios.get("http://localhost:4001/api/blog", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return data;
+};
+
+const deleteBlog = async (id) => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Not authenticated");
+
+  await axios.delete(`http://localhost:4001/api/blog/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+};
 
 const ManageBlogs = () => {
-  const [blogs, setBlogs] = useState([]);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    setTimeout(() => {
-      setBlogs(mockBlogs);
-    }, 1000);
-  }, []);
+  // Fetch blogs
+  const {
+    data: blogs,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["blogs"],
+    queryFn: fetchBlogs,
+  });
 
-  // Handle delete blog
-  const handleDeleteBlog = (blogId) => {
+  // Delete blog mutation
+  const mutation = useMutation({
+    mutationFn: deleteBlog,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["blogs"]);
+      Swal.fire("Deleted!", "Blog has been deleted.", "success");
+    },
+    onError: (error) => {
+      Swal.fire("Error", error.message, "error");
+    },
+  });
+
+  const handleDelete = (id) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        setBlogs(blogs.filter((blog) => blog._id !== blogId));
-        Swal.fire({
-          title: "Deleted!",
-          text: "Your blog post has been deleted.",
-          icon: "success",
-        });
+        mutation.mutate(id);
       }
     });
   };
 
+  if (isLoading) return <p>Loading blogs...</p>;
+  if (isError) return <p>Error fetching blogs. Please log in again.</p>;
+
   return (
-    <div>
-      <div>
-        <div className="flex items-center justify-between m-4">
-          <h5>All Blogs</h5>
-          <h5>Total Blogs: {blogs.length}</h5>
-        </div>
-        <div>
-          <div className="overflow-x-auto">
-            <table className="table table-zebra md:w-[870px]">
-              {/* head */}
-              <thead className="bg-green text-white rounded-lg">
-                <tr>
-                  <th>#</th>
-                  <th>Title</th>
-                  <th>Author</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {blogs.map((blog, index) => (
-                  <tr key={index}>
-                    <th>{index + 1}</th>
-                    <td>{blog.title}</td>
-                    <td>{blog.author}</td>
-                    <td>
-                      <Link to={`/admin/update-blog/${blog._id}`}>
-                        <button className="btn btn-xs btn-circle bg-orange-500 text-white">
-                          <FaEdit />
-                        </button>
-                      </Link>
-                      <button
-                        onClick={() => handleDeleteBlog(blog._id)}
-                        className="btn btn-xs bg-red text-white ml-2"
-                      >
-                        <FaTrashAlt />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Manage Blogs</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {blogs.length === 0 ? (
+          <p>No blogs available.</p>
+        ) : (
+          blogs.map((blog) => (
+            <div
+              key={blog._id}
+              className="border p-4 rounded shadow hover:shadow-lg transition"
+            >
+              <img
+                src={blog.imageUrl}
+                alt={blog.title}
+                className="w-full h-48 object-cover rounded mb-4"
+              />
+              <h2 className="text-xl font-semibold mb-2">{blog.title}</h2>
+              <p className="text-gray-700 mb-2">{blog.author}</p>
+              <div className="flex space-x-4">
+                <Link
+                  to={`/edit-blog/${blog._id}`}
+                  className="text-blue-500 hover:text-blue-700 flex items-center"
+                >
+                  <FaEdit className="mr-1" /> Edit
+                </Link>
+                <button
+                  onClick={() => handleDelete(blog._id)}
+                  className="text-red-500 hover:text-red-700 flex items-center"
+                >
+                  <FaTrashAlt className="mr-1" /> Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
