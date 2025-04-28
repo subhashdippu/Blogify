@@ -16,23 +16,28 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      setLoginError(""); // clear previous errors
+      setLoginError("");
       const response = await axios.post(
         "http://localhost:4001/api/auth/login",
         data
       );
 
-      localStorage.setItem("token", response.data.token);
-      navigate("/dashboard");
+      console.log(response.data);
+
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        navigate("/home");
+      } else {
+        setLoginError("No token returned from the server.");
+      }
     } catch (error) {
       console.error(
         "Login failed:",
         error.response?.data?.message || error.message
       );
-      setLoginError(error.response?.data?.message || "Login failed"); // <-- set error to show below form
+      setLoginError(error.response?.data?.message || "Login failed");
     }
   };
-
   const handleGoogleLogin = () => {
     alert("Google login simulated.");
   };
@@ -73,7 +78,7 @@ const Login = () => {
 
           {/* Login Error */}
           {loginError && (
-            <p className="text-red-500 text-center mb-4">{loginError}</p> // <-- show backend error here
+            <p className="text-red-500 text-center mb-4">{loginError}</p>
           )}
 
           <button type="submit" className="btn btn-primary w-full">

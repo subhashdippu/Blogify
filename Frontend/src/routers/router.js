@@ -6,18 +6,23 @@ import Login from "../pages/login";
 import DashboardLayout from "../pages/admin/ManageBlogs";
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/home",
     element: <Main />,
     children: [
       {
-        path: "/",
+        path: "/home",
         element: <Home />,
       },
     ],
   },
+
   {
     path: "/signup",
     element: <Signup />,
+  },
+  {
+    path: "/",
+    element: <Login />,
   },
   {
     path: "/login",

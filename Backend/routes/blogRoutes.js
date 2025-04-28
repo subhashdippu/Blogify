@@ -11,7 +11,7 @@ const express = require("express");
 
 const router = express.Router();
 
-router.get("/", getAllBlogs);
+router.get("/", authenticate, getAllBlogs);
 router.post("/", authenticate, isAdmin, createBlog);
 router.patch("/:id", authenticate, isAdmin, updateBlog);
 router.delete("/:id", authenticate, isAdmin, deleteBlog);

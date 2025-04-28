@@ -23,11 +23,7 @@ const CustomHeader = () => {
         {/* Middle Column */}
         <div className="flex-1 flex justify-center">
           <h1>
-            <a
-              id="logo"
-              href="https://www.blogilates.com"
-              data-supplied-ml="false"
-            >
+            <a id="logo" href="/home" data-supplied-ml="false">
               <img src={Logo} alt="Blogilates logo" className="max-w-[150px]" />
             </a>
           </h1>

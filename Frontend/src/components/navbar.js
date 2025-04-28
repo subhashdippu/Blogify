@@ -8,9 +8,16 @@ import {
   FaSearch,
   FaBlog,
 } from "react-icons/fa";
-
+import { useNavigate } from "react-router-dom";
 const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
   return (
     <div className="flex items-center justify-evenly bg-white px-6 py-2 border-b">
       {/* Left */}
@@ -68,6 +75,19 @@ const Navbar = () => {
           <FaBlog className="mr-2" size={21} />
           Explore blog
         </button>
+        <div className="dropdown dropdown-hover">
+          <div tabIndex={0} role="button" className="">
+            ⬇️
+          </div>
+          <ul
+            tabIndex={0}
+            className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+          >
+            <li onClick={logout}>
+              <a href="/">Logout</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
