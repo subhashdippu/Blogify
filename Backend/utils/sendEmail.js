@@ -1,7 +1,9 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const nodemailer = require("nodemailer");
+
 const sendVerificationEmail = async (email, token) => {
+  const verifyLink = `http://localhost:4001/api/auth/verify/${token}`;
   try {
     // Configure transporter
     const transporter = nodemailer.createTransport({
@@ -22,10 +24,9 @@ const sendVerificationEmail = async (email, token) => {
       html: `
         <h2>Welcome to Bligify!</h2>
         <p>Please click the link below to verify your email:</p>
-        <a href="http://localhost:4001/api/verify/${token}">Verify Email</a>
+        <a href="${verifyLink}">Verify Email</a>
       `,
     };
-    console.log(token);
 
     await transporter.sendMail(mailOptions);
     console.log("Verification email sent to:", email);

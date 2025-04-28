@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaFacebookF, FaGithub, FaGoogle } from "react-icons/fa";
 import { useForm } from "react-hook-form";
+import axios from "axios"; // Import axios for making API calls
 
 const Signup = () => {
   const {
@@ -9,10 +10,29 @@ const Signup = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const [loading, setLoading] = useState(false); // Loading state for button
+  const [errorMessage, setErrorMessage] = useState(""); // To display any errors from backend
 
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    alert("Signup simulated. Check console for submitted data.");
+  const onSubmit = async (data) => {
+    setLoading(true); // Set loading to true when submitting
+    setErrorMessage(""); // Clear previous errors
+    try {
+      // Make POST request to backend for signup
+      const response = await axios.post(
+        "http://localhost:4001/api/auth/signup",
+        {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }
+      );
+
+      alert(response.data.message); // Alert with message from backend (signup success)
+      setLoading(false); // Reset loading state
+    } catch (err) {
+      setErrorMessage(err.response?.data?.message || "Something went wrong!"); // Display error message
+      setLoading(false); // Reset loading state
+    }
   };
 
   return (
@@ -67,10 +87,20 @@ const Signup = () => {
 
           {/* Submit */}
           <div className="form-control mt-6">
-            <button type="submit" className="btn bg-blue-500 text-white w-full">
-              Sign up
+            <button
+              type="submit"
+              className="btn bg-blue-500 text-white w-full"
+              disabled={loading} // Disable button when loading
+            >
+              {loading ? "Signing up..." : "Sign up"}{" "}
+              {/* Show loading text if loading */}
             </button>
           </div>
+
+          {/* Error Message */}
+          {errorMessage && (
+            <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+          )}
 
           {/* Login Link */}
           <div className="text-center mt-4">
