@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import BlogItem from "../components/blogItem";
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -48,23 +47,33 @@ const Blogs = () => {
   if (error) return <h3 className="text-center mt-5">{error}</h3>;
 
   return (
-    <div className="container my-5 gap-5">
-      <h2 className="text-center mb-4">Latest Blogs</h2>
-      <div
-        className="d-flex flex-wrap justify-content-start"
-        style={{ display: "flex" }}
-      >
-        {blogs.map((blog, i) => (
-          <div key={i} className="px-20" style={{ maxWidth: "50%" }}>
-            <BlogItem
-              title={blog.title}
-              content={blog.content}
-              imageUrl={blog.imageUrl}
-              date={new Date(blog.createdAt).toLocaleDateString()}
-              author={blog.author}
-            />
-          </div>
-        ))}
+    <div className="container mx-auto p-4">
+      <h1 className="text-center text-3xl font-bold mb-6">Blogs</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {blogs.length === 0 ? (
+          <p>No blogs available.</p>
+        ) : (
+          blogs.map((blog) => (
+            <div
+              key={blog._id}
+              className="border p-4 rounded shadow hover:shadow-lg transition"
+            >
+              <img
+                src={blog.imageUrl}
+                alt={blog.title}
+                className="w-full h-48 object-cover rounded mb-4"
+              />
+              <h2 className="text-xl font-semibold mb-2">{blog.title}</h2>
+              <h2 className="text-xl font-semibold mb-2">{blog.content}</h2>
+
+              <p className="text-gray-700 mb-2">
+                {new Date(blog.createdAt).toLocaleDateString()}
+              </p>
+              <p className="text-gray-700 mb-2">{blog.author}</p>
+              <div className="flex space-x-4"></div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
