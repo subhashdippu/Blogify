@@ -162,9 +162,6 @@ npm install
 ```bash
 npm start
 ```
-
-
-
 ## 📸 Screenshots
 
 <img src='./Frontend/src/images/Screenshot1.png'>
