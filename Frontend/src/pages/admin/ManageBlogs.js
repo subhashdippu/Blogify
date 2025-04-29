@@ -26,7 +26,6 @@ const deleteBlog = async (id) => {
 };
 
 const ManageBlogs = () => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   // Fetch blogs

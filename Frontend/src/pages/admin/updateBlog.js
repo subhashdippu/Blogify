@@ -21,12 +21,9 @@ const EditBlog = () => {
         if (!token) throw new Error("Not authenticated");
 
         // Make sure you use the correct API endpoint with the blog id
-        const { data } = await axios.get(
-          `http://localhost:4001/api/blog/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const { data } = await axios.get(`http://localhost:4001/api/blog/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         // Populate the form with the fetched data
         setTitle(data.title);
